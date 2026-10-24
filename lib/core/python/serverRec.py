@@ -5,7 +5,7 @@ from collections import Counter, defaultdict
 from datetime import datetime, timedelta
 
 BLOCK_NAMES = {0: "night", 1: "morning", 2: "afternoon", 3: "evening"}
-
+router = APIRouter()
 
 def time_block(hour: int) -> int:
     if 5 <= hour < 12:  return 1
