@@ -2,6 +2,7 @@ import '../models/assessment.dart';
 import '../models/day_info.dart';
 import '../models/entry.dart';
 import '../models/goal.dart';
+import '../models/insight.dart';
 import '../models/streak.dart';
 import '../models/time_slot.dart';
 import '../models/user_prefs.dart';
@@ -22,6 +23,10 @@ abstract interface class AssessmentRepository {
 
   /// `GET /assessment/status`
   Future<bool> isCompleted();
+
+  /// Saved answers. Sent to the insights endpoints as `user_info`.
+  /// TODO(backend): `GET /assessment/answers` if Python owns the DB.
+  Future<List<AssessmentAnswer>> fetchAnswers();
 }
 
 abstract interface class JournalRepository {
@@ -54,6 +59,16 @@ abstract interface class GoalRepository {
 
   /// `DELETE /goals/{id}`
   Future<void> delete(String id);
+}
+
+/// LLM-written reflections and day plans (lib/core/python/serverRec.py).
+/// Generated on request; each call costs a model round-trip.
+abstract interface class InsightsRepository {
+  /// `POST /reflection`: looks back at [day].
+  Future<Insight> reflect(DateTime day);
+
+  /// `POST /recommendations`: plans [day].
+  Future<Insight> recommend(DateTime day);
 }
 
 /// Whether the user has paid for Premium (unlocks Insights).

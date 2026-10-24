@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 import '../features/assessment/assessment_screen.dart';
 import '../features/dashboard/dashboard_screen.dart';
 import '../features/insights/insights_screen.dart';
+import '../features/insights/recommendations_screen.dart';
+import '../features/insights/reflection_screen.dart';
 import '../features/log_entry/log_entry_screen.dart';
 import '../features/settings/settings_screen.dart';
 import '../features/splash/splash_screen.dart';
@@ -16,6 +18,8 @@ abstract final class Routes {
   static const logEntry = '/log';
   static const settings = '/settings';
   static const insights = '/insights';
+  static const reflection = '/insights/reflection';
+  static const recommendations = '/insights/recommendations';
   static const weeklyStreak = '/streak';
 
 }
@@ -48,7 +52,14 @@ GoRouter buildRouter(AppController app) {
             builder: (_, _) => const LogEntryScreen(),
           ),
           GoRoute(path: 'settings', builder: (_, _) => const SettingsScreen()),
-          GoRoute(path: 'insights', builder: (_, _) => const InsightsScreen()),
+          GoRoute(
+            path: 'insights',
+            builder: (_, _) => const InsightsScreen(),
+            routes: [
+              GoRoute(path: 'reflection', builder: (_, _) => const ReflectionScreen()),
+              GoRoute(path: 'recommendations', builder: (_, _) => const RecommendationsScreen()),
+            ],
+          ),
           GoRoute(path: 'streak', builder: (_, _) => const WeeklyStreakScreen()),
         ],
       ),

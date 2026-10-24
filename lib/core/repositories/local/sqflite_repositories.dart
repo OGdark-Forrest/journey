@@ -65,6 +65,20 @@ class SqfliteAssessmentRepository implements AssessmentRepository {
     return (count ?? 0) > 0;
   }
 
+  @override
+  Future<List<AssessmentAnswer>> fetchAnswers() async {
+    final db = await _store.database;
+    final rows = await db.query('assessment_answers', orderBy: 'answeredAt, questionId');
+    return [
+      for (final row in rows)
+        AssessmentAnswer(
+          questionId: row['questionId']! as String,
+          value: row['value']! as String,
+          custom: row['custom'] == 1,
+        ),
+    ];
+  }
+
   static String? _answer(List<AssessmentAnswer> answers, String id) {
     for (final a in answers) {
       if (a.questionId == id) return a.value;
@@ -86,7 +100,7 @@ class SqfliteJournalRepository implements JournalRepository {
   // Local heuristic: time-of-day presets, defaulting to the user's most
   // frequent past event among them and their recent average happiness.
   @override
-  Future<EntryDraft> fetchDraft(EntryMode mode) async {
+  Future<EntryDraft> fetchDraft() async {
     final db = await _store.database;
     final now = _clock();
     final slot = TimeSlot.nowRounded(intervalMinutes: LocalRules.intervalMinutes, now: now);
@@ -106,14 +120,8 @@ class SqfliteJournalRepository implements JournalRepository {
       limit: 5,
     );
 
-    final prefs = await _readPrefs(db);
-    final loggedToday = await _countOn(db, _today);
-
     return EntryDraft(
       draftId: 'd_${now.microsecondsSinceEpoch}',
-      mode: mode,
-      indexToday: loggedToday + 1,
-      entriesPerDay: prefs.entriesPerDay,
       template: LocalRules.template,
       timeDefault: slot,
       intervalMinutes: LocalRules.intervalMinutes,
@@ -144,7 +152,8 @@ class SqfliteJournalRepository implements JournalRepository {
       'draftId': entry.draftId,
       'date': LocalRules.dateKey(today),
       'time': entry.time.value.toApi(),
-      'mode': entry.mode.apiName,
+      // Blitz mode was removed from the app; the column is kept for old rows.
+      'mode': 'normal',
       'happiness': happiness,
       'event': event,
       'eventCustom': entry.event.custom ? 1 : 0,
@@ -255,7 +264,6 @@ class SqfliteJournalRepository implements JournalRepository {
       entryId: 'e_${row['id']}',
       date: LocalRules.parseDateKey(row['date']! as String),
       time: TimeSlot.parse(row['time']! as String),
-      mode: EntryMode.fromApi(row['mode'] as String?),
       happiness: row['happiness']! as int,
       event: row['event']! as String,
       text: row['text']! as String,

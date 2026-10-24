@@ -9,7 +9,6 @@ import '../../app/router.dart';
 import '../../app/theme.dart';
 import '../../core/models/entry.dart';
 import '../../core/models/goal.dart';
-import '../../shared/theme/palette.dart';
 import '../../shared/theme/spacing.dart';
 import '../../shared/widgets/journey_card.dart';
 import '../../shared/widgets/state_views.dart';
@@ -172,7 +171,6 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
         if (!didPop) _closeExpanded();
       },
       child: Scaffold(
-        backgroundColor: Palette.dashboardBlue,
         body: SafeArea(
           child: ListenableBuilder(
             listenable: Listenable.merge([_c, _deps.app]),
@@ -303,7 +301,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
 
   Widget _expandedOverlay(BuildContext context) {
     final groups = _c.groupedEntries;
-    const background = Palette.dashboardBlue;
+    final background = Theme.of(context).scaffoldBackgroundColor;
     return LayoutBuilder(
       builder: (context, constraints) {
         final full = Offset.zero & constraints.biggest;
@@ -373,7 +371,7 @@ class _HistoryHeader extends StatelessWidget {
   }
 }
 
-/// Post-MVP placeholder entry point for LLM insights.
+/// Entry point for the LLM reflection and recommendation pages.
 class _InsightsTeaser extends StatelessWidget {
   const _InsightsTeaser();
 
@@ -381,7 +379,7 @@ class _InsightsTeaser extends StatelessWidget {
   Widget build(BuildContext context) {
     return JourneyCard(
       onTap: () => context.push(Routes.insights),
-      semanticLabel: 'Insights, coming soon',
+      semanticLabel: 'Insights: reflections and recommendations',
       child: ExcludeSemantics(
         child: Row(
           children: [
@@ -393,13 +391,13 @@ class _InsightsTeaser extends StatelessWidget {
                 children: [
                   Text('Insights', style: context.tt.titleMedium),
                   Text(
-                    'Reflections and a wellness score',
+                    'Reflections and day plans',
                     style: context.tt.bodyMedium?.copyWith(color: context.jc.mutedText),
                   ),
                 ],
               ),
             ),
-            const TagPill(label: 'soon', icon: Icons.lock_clock_rounded),
+            Icon(Icons.chevron_right_rounded, color: context.jc.mutedText),
           ],
         ),
       ),

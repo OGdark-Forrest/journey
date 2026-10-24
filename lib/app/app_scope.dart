@@ -1,6 +1,8 @@
 import 'package:flutter/widgets.dart';
 
+import '../core/models/insight.dart';
 import '../core/python/python_runtime.dart';
+import '../core/repositories/insight_request.dart';
 import '../core/repositories/mock/mock_python_backend.dart';
 import '../core/repositories/local/journey_database.dart';
 import '../core/repositories/local/sqflite_repositories.dart';
@@ -14,6 +16,10 @@ import 'app_controller.dart';
 class SessionState {
   /// The user closed the Premium banner during this launch.
   bool premiumBannerDismissed = false;
+
+  /// Generated reflections / plans keyed by kind + day, so leaving and
+  /// reopening a page doesn't pay for another model call.
+  final Map<(InsightKind, DateTime), Insight> insights = {};
 }
 
 /// Everything screens need, created once at startup.
@@ -25,6 +31,7 @@ class AppDependencies {
     required this.prefs,
     required this.premium,
     required this.goals,
+    required this.insights,
     required this.launchMood,
   }) : app = AppController(python: python, assessment: assessment, prefs: prefs);
 
@@ -34,13 +41,20 @@ class AppDependencies {
   // baseUrl/token, and use it in main.dart.
   factory AppDependencies.mock({Duration latency = const Duration(milliseconds: 250)}) {
     final backend = MockPythonBackend(latency: latency);
+    final assessment = MockAssessmentRepository(backend);
+    final journal = MockJournalRepository(backend);
+    final goals = MockGoalRepository(backend);
     return AppDependencies(
       python: MockPythonRuntime(),
-      assessment: MockAssessmentRepository(backend),
-      journal: MockJournalRepository(backend),
+      assessment: assessment,
+      journal: journal,
       prefs: MockPrefsRepository(backend),
       premium: MockPremiumRepository(),
-      goals: MockGoalRepository(backend),
+      goals: goals,
+      insights: MockInsightsRepository(
+        InsightRequestBuilder(journal: journal, goals: goals, assessment: assessment),
+        latency: latency * 6,
+      ),
       launchMood: LaunchMood(SharedPrefsLaunchExpressionStore()),
     );
   }
@@ -52,11 +66,21 @@ class AppDependencies {
   // with LocalApi*Repository (see api-contract.md "Storage").
   factory AppDependencies.sqflite({JourneyDatabase? database}) {
     final db = database ?? JourneyDatabase();
+    final assessment = SqfliteAssessmentRepository(db);
+    final journal = SqfliteJournalRepository(db);
+    // TODO(backend): goals have no SQLite table yet, so they stay in memory.
+    final goals = MockGoalRepository(MockPythonBackend(latency: Duration.zero));
     return AppDependencies(
       python: MockPythonRuntime(),
-      assessment: SqfliteAssessmentRepository(db),
-      journal: SqfliteJournalRepository(db),
+      assessment: assessment,
+      journal: journal,
       prefs: SqflitePrefsRepository(db),
+      premium: MockPremiumRepository(),
+      goals: goals,
+      insights: MockInsightsRepository(
+        InsightRequestBuilder(journal: journal, goals: goals, assessment: assessment),
+      ),
+      launchMood: LaunchMood(SharedPrefsLaunchExpressionStore()),
     );
   }
 
@@ -66,6 +90,7 @@ class AppDependencies {
   final PrefsRepository prefs;
   final PremiumRepository premium;
   final GoalRepository goals;
+  final InsightsRepository insights;
 
   /// Otter expression for the greeting box, chosen once per launch.
   final LaunchMood launchMood;

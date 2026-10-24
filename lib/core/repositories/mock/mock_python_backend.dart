@@ -128,6 +128,8 @@ class MockPythonBackend {
         ),
       ];
 
+  List<AssessmentAnswer> get answers => List.unmodifiable(_answers.values);
+
   void submitAssessment(List<AssessmentAnswer> answers) {
     for (final a in answers) {
       _answers[a.questionId] = a;
