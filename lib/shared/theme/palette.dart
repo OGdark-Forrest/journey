@@ -38,6 +38,14 @@ abstract final class Palette {
   static const nightText = Color(0xFFF1E9DD);
   static const nightMuted = Color(0xFFB5AA9C);
 
+  // ---- Dashboard background (matte light blue) ----
+  static const dashboardBlue = Color(0xFFB4C9D4);
+
+  // ---- Earth gradient (Enter your log card): light green to light brown ----
+  static const earthGreen = Color(0xFFCFDBB5);
+  static const earthBrown = Color(0xFFC9AE8A);
+  static const earthEdge = Color(0xFF8A6F50);
+
   // ---- Otter mascot ----
   static const otterFur = Color(0xFF8A6446);
   static const otterFurDark = Color(0xFF6B4C34);

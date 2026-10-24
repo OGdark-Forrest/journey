@@ -41,6 +41,9 @@ dependencies:
   go_router: 18.1.1
   # Celebration bursts after saving entries / finishing the assessment.
   confetti: 0.8.0
+  # Tiny on-device key/value store. Remembers the last launch's otter face so the
+  # next launch can pick a different one (in-memory mock backend resets on restart).
+  shared_preferences: 2.5.6
   # On-device SQLite storage (lib/core/repositories/local/). Native on Android,
   # iOS and macOS; other platforms fall back to the in-memory mock (see main.dart).
   # TODO(backend): remove if Python ends up owning the DB (api-contract.md "Storage").

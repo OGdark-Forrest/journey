@@ -5,7 +5,6 @@ import '../../../core/models/entry.dart';
 import '../../../core/models/happiness.dart';
 import '../../../shared/theme/spacing.dart';
 import '../../../shared/widgets/journey_card.dart';
-import '../../../shared/widgets/otter_mascot.dart';
 import '../../../shared/widgets/time_format.dart';
 
 /// One saved entry in the dashboard log history.
@@ -23,29 +22,16 @@ class HistoryTile extends StatelessWidget {
       padding: const EdgeInsets.all(Space.md),
       semanticLabel: '$time. ${entry.text} Felt ${Happiness.phrase(entry.happiness)}.',
       child: ExcludeSemantics(
-        child: Row(
-          children: [
-            OtterMascot(mood: entry.happiness, size: 44, animate: false),
-            const SizedBox(width: Space.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(entry.text, style: context.tt.bodyMedium),
-                  const SizedBox(height: Space.xs),
-                  Row(
-                    children: [
-                      Text(time, style: context.tt.labelMedium?.copyWith(color: context.jc.mutedText)),
-                      if (entry.mode == EntryMode.blitz) ...[
-                        const SizedBox(width: Space.sm),
-                        const TagPill(label: 'blitz', icon: Icons.bolt_rounded),
-                      ],
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
+        child: SizedBox(
+          width: double.infinity,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(entry.text, style: context.tt.bodyMedium),
+              const SizedBox(height: Space.xs),
+              Text(time, style: context.tt.labelMedium?.copyWith(color: context.jc.mutedText)),
+            ],
+          ),
         ),
       ),
     );

@@ -1,12 +1,12 @@
 import 'package:go_router/go_router.dart';
 
-import '../core/models/entry.dart';
 import '../features/assessment/assessment_screen.dart';
 import '../features/dashboard/dashboard_screen.dart';
 import '../features/insights/insights_screen.dart';
 import '../features/log_entry/log_entry_screen.dart';
 import '../features/settings/settings_screen.dart';
 import '../features/splash/splash_screen.dart';
+import '../features/streak/weekly_streak_screen.dart';
 import 'app_controller.dart';
 
 abstract final class Routes {
@@ -16,15 +16,15 @@ abstract final class Routes {
   static const logEntry = '/log';
   static const settings = '/settings';
   static const insights = '/insights';
+  static const weeklyStreak = '/streak';
 
-  static String logEntryFor(EntryMode mode) => '$logEntry?mode=${mode.apiName}';
 }
 
 /// First launch: splash -> assessment -> dashboard. Afterwards: splash -> dashboard.
 GoRouter buildRouter(AppController app) {
   return GoRouter(
     initialLocation: Routes.splash,
-    refreshListenable: app,
+    refreshListenable: app.routingRefresh,
     redirect: (context, state) {
       final loc = state.matchedLocation;
       if (app.status != BootStatus.ready) {
@@ -45,12 +45,11 @@ GoRouter buildRouter(AppController app) {
         routes: [
           GoRoute(
             path: 'log',
-            builder: (_, state) => LogEntryScreen(
-              initialMode: EntryMode.fromApi(state.uri.queryParameters['mode']),
-            ),
+            builder: (_, _) => const LogEntryScreen(),
           ),
           GoRoute(path: 'settings', builder: (_, _) => const SettingsScreen()),
           GoRoute(path: 'insights', builder: (_, _) => const InsightsScreen()),
+          GoRoute(path: 'streak', builder: (_, _) => const WeeklyStreakScreen()),
         ],
       ),
     ],

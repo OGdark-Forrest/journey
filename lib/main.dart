@@ -4,9 +4,13 @@ import 'package:flutter/widgets.dart';
 import 'app/app.dart';
 import 'app/app_scope.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(JourneyApp(deps: _createDependencies()));
+    final deps = _createDependencies();
+  // Pick this launch's otter face before the first frame (never throws,
+  // times out after 2s).
+  await deps.launchMood.init();
+  runApp(JourneyApp(deps: deps));
 }
 
 /// Real on-device storage where sqflite runs natively (Android, iOS, macOS).

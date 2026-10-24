@@ -2,9 +2,10 @@ import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../app/theme.dart';
+import '../theme/palette.dart';
 import '../theme/spacing.dart';
 
-enum ChunkyVariant { primary, secondary, flame }
+enum ChunkyVariant { primary, secondary, flame, earth }
 
 /// Duolingo-style button with a solid bottom edge that "presses in" on tap.
 class ChunkyButton extends StatefulWidget {
@@ -59,6 +60,8 @@ class _ChunkyButtonState extends State<ChunkyButton> {
       ChunkyVariant.primary => (cs.primary, jc.primaryEdge, cs.onPrimary, null),
       ChunkyVariant.flame => (cs.tertiary, jc.flame.withValues(alpha: 0.6), cs.onTertiary, null),
       ChunkyVariant.secondary => (cs.surface, jc.cardEdge, cs.onSurface, jc.cardBorder),
+      // White face on the earth gradient; text in the cocoa brown used across the app.
+      ChunkyVariant.earth => (Colors.white, Palette.earthEdge, Palette.cocoa, null),
     };
     // Darker flame edge reads better than the translucent fallback above.
     final edgeColor = widget.variant == ChunkyVariant.flame && _enabled

@@ -125,7 +125,7 @@ class _EventSheetState extends State<_EventSheet> {
   }
 }
 
-/// Happiness picker in a sheet (used from the sentence chip, mainly in blitz).
+/// Happiness picker in a sheet (opened from the sentence chip).
 Future<int?> showHappinessSheet(BuildContext context, {required int current, required int usual}) {
   return showModalBottomSheet<int>(
     context: context,
