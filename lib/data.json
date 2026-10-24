@@ -1,0 +1,100 @@
+{
+  "user_info": {
+    "id": {
+      "params": [
+        "INTEGER"
+      ],
+      "mods": "PRIMARY KEY AUTOINCREMENT"
+    },
+    "name": {
+      "params": [
+        "TEXT"
+      ],
+      "mods": "NOT NULL"
+    },
+    "age": {
+      "params": [
+        "INTEGER"
+      ],
+      "mods": "NOT NULL CHECK age >= 0"
+    },
+    "gender": {
+      "params": [
+        "TEXT"
+      ],
+      "mods": "NOT NULL; suggested values: male, female, non_binary, prefer_not_to_say"
+    },
+    "employmentStatus": {
+      "params": [
+        "TEXT"
+      ],
+      "mods": "NOT NULL CHECK IN (student, employed, unemployed, self_employed, retired)"
+    }
+  },
+  "ui_info": {
+    "id": {
+      "params": [
+        "INTEGER"
+      ],
+      "mods": "PRIMARY KEY AUTOINCREMENT"
+    },
+    "userId": {
+      "params": [
+        "INTEGER"
+      ],
+      "mods": "NOT NULL UNIQUE REFERENCES user_info(id) ON DELETE CASCADE"
+    },
+    "isDarkMode": {
+      "params": [
+        "INTEGER"
+      ],
+      "mods": "NOT NULL DEFAULT 0; 0=false, 1=true"
+    }
+  },
+  "authentication": {
+    "userId": {
+      "params": [
+        "INTEGER"
+      ],
+      "mods": "PRIMARY KEY REFERENCES user_info(id) ON DELETE CASCADE"
+    },
+    "authMethod": {
+      "params": [
+        "TEXT"
+      ],
+      "mods": "NOT NULL"
+    },
+    "lastLoginAt": {
+      "params": [
+        "TEXT"
+      ],
+      "mods": "None"
+    }
+  },
+  "logs": {
+    "id": {
+      "params": [
+        "INTEGER"
+      ],
+      "mods": "PRIMARY KEY AUTOINCREMENT"
+    },
+    "userId": {
+      "params": [
+        "INTEGER"
+      ],
+      "mods": "REFERENCES user_info(id) ON DELETE SET NULL"
+    },
+    "action": {
+      "params": [
+        "TEXT"
+      ],
+      "mods": "NOT NULL"
+    },
+    "createdAt": {
+      "params": [
+        "TEXT"
+      ],
+      "mods": "NOT NULL"
+    }
+  }
+}
