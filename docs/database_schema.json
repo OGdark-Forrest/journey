@@ -1,0 +1,55 @@
+{
+  "_about": "On-device SQLite schema (v1) for Journey. Source of truth: lib/core/repositories/local/journey_database.dart. Dates are YYYY-MM-DD, times HH:mm, timestamps ISO 8601 (same as .kiro/steering/api-contract.md).",
+  "entries": {
+    "id": { "params": ["INTEGER"], "mods": "PRIMARY KEY AUTOINCREMENT" },
+    "draftId": { "params": ["TEXT"], "mods": "NOT NULL" },
+    "date": { "params": ["TEXT"], "mods": "NOT NULL; YYYY-MM-DD" },
+    "time": { "params": ["TEXT"], "mods": "NOT NULL; HH:mm, 30-min steps" },
+    "mode": { "params": ["TEXT"], "mods": "NOT NULL CHECK IN (normal, blitz)" },
+    "happiness": { "params": ["INTEGER"], "mods": "NOT NULL CHECK BETWEEN 1 AND 5" },
+    "event": { "params": ["TEXT"], "mods": "NOT NULL CHECK non-empty" },
+    "eventCustom": { "params": ["INTEGER"], "mods": "NOT NULL DEFAULT 0; 1 = user typed their own event" },
+    "timeKeptDefault": { "params": ["INTEGER"], "mods": "NOT NULL; 1 = user kept the predicted time" },
+    "happinessKeptDefault": { "params": ["INTEGER"], "mods": "NOT NULL; 1 = user kept the predicted happiness" },
+    "eventKeptDefault": { "params": ["INTEGER"], "mods": "NOT NULL; 1 = user kept the predicted event" },
+    "text": { "params": ["TEXT"], "mods": "NOT NULL; final rendered journal sentence" },
+    "createdAt": { "params": ["TEXT"], "mods": "NOT NULL; ISO 8601" }
+  },
+  "day_info": {
+    "date": { "params": ["TEXT"], "mods": "PRIMARY KEY; YYYY-MM-DD" },
+    "wakeTime": { "params": ["TEXT"], "mods": "NOT NULL; HH:mm" },
+    "wakeKeptDefault": { "params": ["INTEGER"], "mods": "NOT NULL; 1 = user kept the default wake time" },
+    "updatedAt": { "params": ["TEXT"], "mods": "NOT NULL; ISO 8601" }
+  },
+  "prefs": {
+    "id": { "params": ["INTEGER"], "mods": "PRIMARY KEY CHECK id = 1; single row" },
+    "displayName": { "params": ["TEXT"], "mods": "NOT NULL; set by the assessment" },
+    "entriesPerDay": { "params": ["INTEGER"], "mods": "NOT NULL CHECK BETWEEN 1 AND 20; default 10" },
+    "reminderTime": { "params": ["TEXT"], "mods": "HH:mm; NULL = reminders off" },
+    "theme": { "params": ["TEXT"], "mods": "NOT NULL CHECK IN (system, light, dark)" }
+  },
+  "assessment_answers": {
+    "questionId": { "params": ["TEXT"], "mods": "PRIMARY KEY" },
+    "value": { "params": ["TEXT"], "mods": "NOT NULL; multi-select joined with ', '" },
+    "custom": { "params": ["INTEGER"], "mods": "NOT NULL DEFAULT 0; 1 = typed answer" },
+    "answeredAt": { "params": ["TEXT"], "mods": "NOT NULL; ISO 8601" }
+  },
+  "_reflection_prompts_note": "Not stored yet. Reserved for the post-MVP Insights feature (reflections). Carried over from the original Quick Journal prompt seed.",
+  "reflection_prompts": [
+    { "id": 1, "promptText": "What made you happy today?", "category": "Daily Life", "isActive": true, "sortOrder": 1 },
+    { "id": 2, "promptText": "What is one thing you are grateful for today?", "category": "Daily Life", "isActive": true, "sortOrder": 2 },
+    { "id": 3, "promptText": "What was the most memorable moment of your day?", "category": "Daily Life", "isActive": true, "sortOrder": 3 },
+    { "id": 4, "promptText": "What is something new you learned today?", "category": "Personal Growth", "isActive": true, "sortOrder": 4 },
+    { "id": 5, "promptText": "What is one habit you want to improve?", "category": "Personal Growth", "isActive": true, "sortOrder": 5 },
+    { "id": 6, "promptText": "What is something you are proud of yourself for?", "category": "Personal Growth", "isActive": true, "sortOrder": 6 },
+    { "id": 7, "promptText": "What is the biggest challenge you faced today?", "category": "Reflection", "isActive": true, "sortOrder": 7 },
+    { "id": 8, "promptText": "What would you do differently if you could repeat today?", "category": "Reflection", "isActive": true, "sortOrder": 8 },
+    { "id": 9, "promptText": "What has been on your mind lately?", "category": "Reflection", "isActive": true, "sortOrder": 9 },
+    { "id": 10, "promptText": "What is one goal you want to achieve this week?", "category": "Goals", "isActive": true, "sortOrder": 10 },
+    { "id": 11, "promptText": "What small step can you take toward your future?", "category": "Goals", "isActive": true, "sortOrder": 11 },
+    { "id": 12, "promptText": "What would your ideal day look like?", "category": "Goals", "isActive": true, "sortOrder": 12 },
+    { "id": 13, "promptText": "Who made a positive difference in your life recently?", "category": "Relationships", "isActive": true, "sortOrder": 13 },
+    { "id": 14, "promptText": "What is something you wish you could tell someone?", "category": "Relationships", "isActive": true, "sortOrder": 14 },
+    { "id": 15, "promptText": "Describe your current mood in three words. Why?", "category": "Emotions", "isActive": true, "sortOrder": 15 }
+  ]
+}

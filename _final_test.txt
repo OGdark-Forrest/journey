@@ -1,0 +1,3 @@
+00:00 +0: loading C:/Users/Admin/Desktop/Dart/models/flutter_package_1/test/widget_test.dart
+00:00 +0: first launch boots through splash into the assessment intro
+00:00 +1: All tests passed!

@@ -44,6 +44,11 @@ dependencies:
   # Tiny on-device key/value store. Remembers the last launch's otter face so the
   # next launch can pick a different one (in-memory mock backend resets on restart).
   shared_preferences: 2.5.6
+  # On-device SQLite storage (lib/core/repositories/local/). Native on Android,
+  # iOS and macOS; other platforms fall back to the in-memory mock (see main.dart).
+  # TODO(backend): remove if Python ends up owning the DB (api-contract.md "Storage").
+  sqflite: 2.4.5
+  path: 1.9.1
   # TODO(backend): add `serious_python` (pinned) + `http` once the Python branch is ready.
   # See .kiro/steering/tech.md "Android integration checklist" before adding.
 
