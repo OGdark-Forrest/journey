@@ -1,15 +1,18 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 
-import '../../core/models/day_info.dart';
 import '../../core/models/entry.dart';
+import '../../core/models/goal.dart';
 import '../../core/models/streak.dart';
-import '../../core/models/time_slot.dart';
 import '../../core/repositories/repositories.dart';
 
 class DashboardController extends ChangeNotifier {
-  DashboardController(this._journal);
+  DashboardController(this._journal, this._premium, this._goalRepo);
 
   final JournalRepository _journal;
+  final PremiumRepository _premium;
+  final GoalRepository _goalRepo;
 
   /// How far back the history list goes.
   // TODO(backend): replace with paging over `GET /entries?from=&to=` (load
@@ -25,58 +28,96 @@ class DashboardController extends ChangeNotifier {
   StreakInfo? _streak;
   StreakInfo? get streak => _streak;
 
-  DayInfo? _today;
-  DayInfo? get today => _today;
-
   List<LogEntry> _entries = const [];
   List<LogEntry> get entries => _entries;
 
-  bool _savingWake = false;
-  bool get savingWake => _savingWake;
+  /// Null = unknown (still loading, or the check failed). The Premium banner
+  /// only shows when this is explicitly false.
+  bool? _isPremium;
+  bool? get isPremium => _isPremium;
 
-  bool get hasData => _streak != null && _today != null;
+  List<Goal> _goals = const [];
+
+  /// Goals of [period], in the order they were added.
+  List<Goal> goalsFor(GoalPeriod period) => [for (final g in _goals) if (g.period == period) g];
+
+  bool get hasData => _streak != null;
 
   /// [silent] keeps current content on screen while refreshing.
-  Future<void> load({bool silent = false}) async {
+  /// Returns false if the journal couldn't be loaded.
+  Future<bool> load({bool silent = false}) async {
     if (!silent) {
       _loading = true;
       _error = null;
       notifyListeners();
     }
+    unawaited(_loadPremium());
     try {
       final now = DateTime.now();
       final today = DateTime(now.year, now.month, now.day);
       final results = await Future.wait([
         _journal.fetchStreak(),
-        _journal.fetchDay(today),
         _journal.fetchEntries(from: DateTime(today.year, today.month, today.day - historyDays), to: today),
+        _goalRepo.fetch(),
       ]);
       _streak = results[0] as StreakInfo;
-      _today = results[1] as DayInfo;
-      _entries = results[2] as List<LogEntry>;
+      _entries = results[1] as List<LogEntry>;
+      _goals = results[2] as List<Goal>;
       _error = null;
+      return true;
     } catch (e) {
       _error = 'Couldn\'t load your journal.';
+      return false;
     } finally {
       _loading = false;
       notifyListeners();
     }
   }
 
-  Future<void> setWakeTime(TimeSlot slot) async {
-    final day = _today;
-    if (day == null) return;
-    _savingWake = true;
+  /// Throws if the goal couldn't be saved. The list is left unchanged.
+  Future<void> addGoal(GoalPeriod period, String text) async {
+    final goal = await _goalRepo.add(period, text);
+    _goals = [..._goals, goal];
+    notifyListeners();
+  }
+
+  /// Checking a goal off deletes it. It disappears at once and comes back if
+  /// the delete fails.
+  Future<void> completeGoal(Goal goal) async {
+    final before = _goals;
+    _goals = [for (final g in _goals) if (g.id != goal.id) g];
     notifyListeners();
     try {
-      _today = await _journal.saveWakeTime(
-        day.date,
-        FieldValue(value: slot, keptDefault: slot == day.wakeTimeDefault),
-      );
-    } finally {
-      _savingWake = false;
+      await _goalRepo.delete(goal.id);
+    } catch (e) {
+      debugPrint('Could not delete goal: $e');
+      _goals = before;
       notifyListeners();
     }
+  }
+
+  /// Failures are silent: the banner just stays hidden.
+  Future<void> _loadPremium() async {
+    try {
+      _isPremium = await _premium.isPremium().timeout(const Duration(seconds: 2));
+    } catch (e) {
+      debugPrint('Premium status unavailable: $e');
+      _isPremium = null;
+    }
+    notifyListeners();
+  }
+
+  bool _disposed = false;
+
+  @override
+  void notifyListeners() {
+    if (!_disposed) super.notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
   }
 
   /// Entries grouped by day, newest day first.
@@ -87,14 +128,5 @@ class DashboardController extends ChangeNotifier {
     }
     final days = groups.keys.toList()..sort((a, b) => b.compareTo(a));
     return [for (final d in days) (d, groups[d]!)];
-  }
-
-  /// Average happiness logged today, for the otter on the today card.
-  int? get todayMood {
-    final day = _today?.date;
-    if (day == null) return null;
-    final today = _entries.where((e) => e.date == day).map((e) => e.happiness).toList();
-    if (today.isEmpty) return null;
-    return (today.reduce((a, b) => a + b) / today.length).round();
   }
 }

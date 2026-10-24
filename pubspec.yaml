@@ -41,6 +41,9 @@ dependencies:
   go_router: 18.1.1
   # Celebration bursts after saving entries / finishing the assessment.
   confetti: 0.8.0
+  # Tiny on-device key/value store. Remembers the last launch's otter face so the
+  # next launch can pick a different one (in-memory mock backend resets on restart).
+  shared_preferences: 2.5.6
   # TODO(backend): add `serious_python` (pinned) + `http` once the Python branch is ready.
   # See .kiro/steering/tech.md "Android integration checklist" before adding.
 

@@ -33,10 +33,8 @@ This is the **MVP**: fully **offline**, no accounts, no cloud, no auth.
   standard wake time. It is not one of the `n` entries.
 - **Streak** counts a day after **1 entry** by default; the threshold is a configurable
   value (`streakMinEntries`).
-- User can log using two different modes:
-  - **Normal** — a ~30-min-interval time field defaulting to current time, a happiness
-    scale (mascot reacts to the value), and the specific event info needed.
-  - **Blitz** — a fast, low-friction log; generated instantly from previous logs or hardcoded data/prompts.
+- A log entry has a ~30-min-interval time field defaulting to current time, a happiness
+  scale (mascot reacts to the value), and the specific event info needed.
 - The event chip has ~4 preset options + a 5th **custom** option.
 
 ## Screens (MVP)

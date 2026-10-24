@@ -1,6 +1,7 @@
 import '../../models/assessment.dart';
 import '../../models/day_info.dart';
 import '../../models/entry.dart';
+import '../../models/goal.dart';
 import '../../models/happiness.dart';
 import '../../models/streak.dart';
 import '../../models/time_slot.dart';
@@ -144,7 +145,7 @@ class MockPythonBackend {
 
   // TODO(backend): replaced by the Python prediction behind `GET /entries/draft`.
   // This fake just buckets by time of day and picks the most frequent past event.
-  EntryDraft draft(EntryMode mode) {
+  EntryDraft draft() {
     final now = TimeSlot.nowRounded();
     final options = _optionsFor(now);
     final history = _entries.where((e) => options.contains(e.event)).map((e) => e.event);
@@ -163,9 +164,6 @@ class MockPythonBackend {
 
     return EntryDraft(
       draftId: 'd_${++_ids}',
-      mode: mode,
-      indexToday: _entriesOn(_today).length + 1,
-      entriesPerDay: prefs.entriesPerDay,
       template: _template,
       timeDefault: now,
       intervalMinutes: 30,
@@ -184,7 +182,6 @@ class MockPythonBackend {
       time: entry.time.value,
       event: entry.event.value,
       happiness: entry.happiness.value,
-      mode: entry.mode,
     );
     _entries.insert(0, saved);
     _sortEntries();
@@ -305,7 +302,6 @@ class MockPythonBackend {
           time: TimeSlot.parse(time),
           event: event,
           happiness: happiness,
-          mode: happiness.isEven ? EntryMode.blitz : EntryMode.normal,
         ));
       }
     });
@@ -317,7 +313,6 @@ class MockPythonBackend {
     required TimeSlot time,
     required String event,
     required int happiness,
-    required EntryMode mode,
   }) {
     final text = _template
         .replaceAll('{time}', time.toLabel12h())
@@ -327,12 +322,28 @@ class MockPythonBackend {
       entryId: 'e_${++_ids}',
       date: _dateOnly(date),
       time: time,
-      mode: mode,
       happiness: happiness,
       event: event,
       text: text,
     );
   }
+
+  // ---------------------------------------------------------------------------
+  // Goals
+  // TODO(backend): replaced by `GET /goals`, `POST /goals`, `DELETE /goals/{id}`.
+  // ---------------------------------------------------------------------------
+
+  final List<Goal> _goals = [];
+
+  List<Goal> goals() => List.unmodifiable(_goals);
+
+  Goal addGoal(GoalPeriod period, String text) {
+    final goal = Goal(id: 'g_${++_ids}', period: period, text: text);
+    _goals.add(goal);
+    return goal;
+  }
+
+  void deleteGoal(String id) => _goals.removeWhere((g) => g.id == id);
 
   List<LogEntry> _entriesOn(DateTime d) => _entries.where((e) => e.date == d).toList();
 

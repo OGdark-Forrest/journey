@@ -81,15 +81,12 @@ user's standard wake time (learned from the assessment, then from history).
 ```
 `200 { "date": "2026-10-24", "wakeTime": { "value": "08:00", "default": "07:30" } }`
 
-### `GET /entries/draft?mode=normal|blitz`
+### `GET /entries/draft`
 Returns the next prewritten entry. The **server predicts all 3 defaults** from the user's
 history and time of day (e.g. a morning entry is likely "had breakfast").
 ```json
 {
   "draftId": "d_123",
-  "mode": "normal",
-  "indexToday": 3,
-  "entriesPerDay": 10,
   "template": "At {time} I {event} and felt {happiness}.",
   "time": { "default": "14:30", "intervalMinutes": 30 },
   "happiness": { "min": 1, "max": 5, "default": 3 },
@@ -101,9 +98,6 @@ history and time of day (e.g. a morning entry is likely "had breakfast").
 }
 ```
 - `template` tokens `{time}`, `{event}`, `{happiness}` are rendered inline as tappable chips.
-- `indexToday` is 1-based (this is the 3rd entry today).
-- **Blitz** uses the same shape; the server returns defaults it's most confident in so the
-  user can save in one tap. Can be generated from previous logs or hardcoded prompts.
 
 ### `POST /entries`
 ```json

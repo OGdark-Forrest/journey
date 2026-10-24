@@ -1,6 +1,7 @@
 import '../../models/assessment.dart';
 import '../../models/day_info.dart';
 import '../../models/entry.dart';
+import '../../models/goal.dart';
 import '../../models/streak.dart';
 import '../../models/time_slot.dart';
 import '../../models/user_prefs.dart';
@@ -39,9 +40,9 @@ class MockJournalRepository implements JournalRepository {
   final MockPythonBackend _backend;
 
   @override
-  Future<EntryDraft> fetchDraft(EntryMode mode) async {
+  Future<EntryDraft> fetchDraft() async {
     await _backend.roundTrip();
-    return _backend.draft(mode);
+    return _backend.draft();
   }
 
   @override
@@ -73,6 +74,42 @@ class MockJournalRepository implements JournalRepository {
     await _backend.roundTrip();
     return _backend.setWakeTime(date, wakeTime);
   }
+}
+
+class MockGoalRepository implements GoalRepository {
+  MockGoalRepository(this._backend);
+  final MockPythonBackend _backend;
+
+  @override
+  Future<List<Goal>> fetch() async {
+    await _backend.roundTrip();
+    return _backend.goals();
+  }
+
+  @override
+  Future<Goal> add(GoalPeriod period, String text) async {
+    await _backend.roundTrip();
+    return _backend.addGoal(period, text);
+  }
+
+  @override
+  Future<void> delete(String id) async {
+    await _backend.roundTrip();
+    _backend.deleteGoal(id);
+  }
+}
+
+/// In-memory Premium flag. Defaults to not Premium; no payment involved.
+// TODO(post-mvp): replace with the real paywall (store purchase + cloud
+// entitlement check). Flip [_premium] to true to preview the Premium UI.
+class MockPremiumRepository implements PremiumRepository {
+  bool _premium = false;
+
+  @override
+  Future<bool> isPremium() async => _premium;
+
+  @override
+  Future<void> setPremium(bool value) async => _premium = value;
 }
 
 class MockPrefsRepository implements PrefsRepository {

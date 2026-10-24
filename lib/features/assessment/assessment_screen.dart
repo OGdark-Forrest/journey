@@ -65,8 +65,7 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
     }
     await showCelebration(
       context,
-      title: 'You\'re all set!',
-      message: 'Your entries will come mostly prewritten from now on. Just tweak what was different.',
+      title: 'Youre all set',
       buttonLabel: 'Go to my journal',
     );
     // Router redirects to the dashboard once this flips.
@@ -311,13 +310,6 @@ class _Intro extends StatelessWidget {
           const OtterMascot(mood: Happiness.max, size: 160),
           const SizedBox(height: Space.xl),
           Text('Hi there!', style: context.tt.headlineMedium, textAlign: TextAlign.center),
-          const SizedBox(height: Space.md),
-          Text(
-            'A few quick questions about your usual day, so your journal entries can come '
-            'mostly prewritten. Takes about 2 minutes.',
-            style: context.tt.bodyLarge?.copyWith(color: context.jc.mutedText),
-            textAlign: TextAlign.center,
-          ),
           const Spacer(flex: 3),
           ChunkyButton(label: 'Let\'s go', onPressed: onStart),
         ],

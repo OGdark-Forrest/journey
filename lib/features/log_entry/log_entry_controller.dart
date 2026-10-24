@@ -7,12 +7,9 @@ import '../../core/repositories/repositories.dart';
 /// Holds the prewritten draft and the user's edits to its 3 fields.
 /// "Kept default" is derived by comparing each value to the draft default.
 class LogEntryController extends ChangeNotifier {
-  LogEntryController(this._journal, {required this._mode});
+  LogEntryController(this._journal);
 
   final JournalRepository _journal;
-
-  EntryMode _mode;
-  EntryMode get mode => _mode;
 
   EntryDraft? _draft;
   EntryDraft? get draft => _draft;
@@ -45,7 +42,7 @@ class LogEntryController extends ChangeNotifier {
     _error = null;
     notifyListeners();
     try {
-      final d = await _journal.fetchDraft(_mode);
+      final d = await _journal.fetchDraft();
       _draft = d;
       _time = d.timeDefault;
       _happiness = d.happinessDefault;
@@ -57,13 +54,6 @@ class LogEntryController extends ChangeNotifier {
       _loading = false;
       notifyListeners();
     }
-  }
-
-  /// Switching modes fetches a fresh draft for that mode.
-  Future<void> setMode(EntryMode mode) async {
-    if (mode == _mode) return;
-    _mode = mode;
-    await load();
   }
 
   void setTime(TimeSlot t) {
@@ -96,7 +86,6 @@ class LogEntryController extends ChangeNotifier {
     try {
       return await _journal.saveEntry(NewEntry(
         draftId: d.draftId,
-        mode: _mode,
         time: FieldValue(value: _time, keptDefault: timeIsDefault),
         happiness: FieldValue(value: _happiness, keptDefault: happinessIsDefault),
         event: FieldValue(value: _event, keptDefault: eventIsDefault, custom: _eventCustom),
@@ -111,7 +100,5 @@ class LogEntryController extends ChangeNotifier {
   }
 }
 
-/// Confetti is saved for moments that matter so it doesn't get noisy:
-/// the first entry of the day (streak kept) and hitting the daily goal.
-bool shouldCelebrate(SaveEntryResult r) =>
-    r.indexToday == r.streak.streakMinEntries || r.indexToday == r.streak.entriesPerDay;
+/// Confetti is saved for the first entry of the day, when the streak is kept.
+bool shouldCelebrate(SaveEntryResult r) => r.indexToday == r.streak.streakMinEntries;

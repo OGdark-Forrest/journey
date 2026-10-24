@@ -19,8 +19,8 @@ lib/
   features/
     splash/                 # starts Python + waits on /health (mocked for now)
     assessment/             # initial in-depth onboarding (first launch only)
-    dashboard/              # home: streak, scrollable log history, add-log + settings buttons
-    log_entry/              # core screen: prewritten entry with editable chips (normal/blitz)
+    dashboard/              # home: streak, goals, scrollable log history, add-log + settings buttons
+    log_entry/              # core screen: prewritten entry with editable chips
     settings/               # small user prefs (no account in MVP)
     insights/               # suggestions/reflections (post-MVP, stubbed)
 ```

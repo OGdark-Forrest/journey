@@ -3,7 +3,6 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../app/app_scope.dart';
 import '../../app/theme.dart';
-import '../../core/models/entry.dart';
 import '../../core/models/happiness.dart';
 import '../../shared/theme/spacing.dart';
 import '../../shared/widgets/celebration.dart';
@@ -23,19 +22,14 @@ import 'widgets/field_sheets.dart';
 /// The core screen: a prewritten entry (one event, 3 fields) the user tweaks.
 /// Pops with the [SaveEntryResult] after saving.
 class LogEntryScreen extends StatefulWidget {
-  const LogEntryScreen({super.key, required this.initialMode});
-
-  final EntryMode initialMode;
+  const LogEntryScreen({super.key});
 
   @override
   State<LogEntryScreen> createState() => _LogEntryScreenState();
 }
 
 class _LogEntryScreenState extends State<LogEntryScreen> {
-  late final LogEntryController _c = LogEntryController(
-    AppScope.of(context).journal,
-    mode: widget.initialMode,
-  );
+  late final LogEntryController _c = LogEntryController(AppScope.of(context).journal);
 
   @override
   void initState() {
@@ -92,13 +86,10 @@ class _LogEntryScreenState extends State<LogEntryScreen> {
       return;
     }
     if (shouldCelebrate(result)) {
-      final goal = result.indexToday == result.streak.entriesPerDay;
       await showCelebration(
         context,
-        title: goal ? 'Daily goal done!' : 'Streak kept!',
-        message: goal
-            ? 'All ${result.streak.entriesPerDay} entries logged today.'
-            : 'First entry of the day is in. See you for the next one.',
+        title: 'Streak kept!',
+        message: 'First entry of the day is in. See you for the next one.',
         highlight: StreakPill(days: result.streak.current, activeToday: true),
       );
       if (!mounted) return;
@@ -121,7 +112,6 @@ class _LogEntryScreenState extends State<LogEntryScreen> {
               icon: const Icon(Icons.close_rounded),
               onPressed: () => context.pop(),
             ),
-            title: Text(d == null ? 'New entry' : 'Entry ${d.indexToday} of ${d.entriesPerDay}'),
           ),
           body: _body(context),
           bottomNavigationBar: d == null || _c.loading
@@ -129,7 +119,7 @@ class _LogEntryScreenState extends State<LogEntryScreen> {
               : SafeArea(
                   minimum: const EdgeInsets.fromLTRB(Space.screen, Space.sm, Space.screen, Space.lg),
                   child: ChunkyButton(
-                    label: _c.mode == EntryMode.blitz ? 'Looks right, save' : 'Save entry',
+                    label: 'Save entry',
                     icon: Icons.check_rounded,
                     loading: _c.saving,
                     onPressed: _c.canSave ? _save : null,
@@ -145,26 +135,12 @@ class _LogEntryScreenState extends State<LogEntryScreen> {
     final d = _c.draft;
     if (d == null) return ErrorView(message: _c.error ?? 'Something went wrong.', onRetry: _c.load);
 
-    final blitz = _c.mode == EntryMode.blitz;
     return ListView(
       padding: const EdgeInsets.fromLTRB(Space.screen, Space.sm, Space.screen, Space.xl),
       children: [
-        SegmentedButton<EntryMode>(
-          segments: const [
-            ButtonSegment(value: EntryMode.normal, label: Text('Normal'), icon: Icon(Icons.edit_note_rounded)),
-            ButtonSegment(value: EntryMode.blitz, label: Text('Blitz'), icon: Icon(Icons.bolt_rounded)),
-          ],
-          selected: {_c.mode},
-          showSelectedIcon: false,
-          onSelectionChanged: (s) => _c.setMode(s.first),
-        ),
-        const SizedBox(height: Space.xl),
         _OtterSays(
           mood: _c.happiness,
-          size: blitz ? 80 : 104,
-          text: blitz
-              ? 'Quick one? Here\'s my best guess. Tap anything that\'s off.'
-              : 'Here\'s what I think happened. Keep what\'s right, change what isn\'t.',
+          text: 'Here\'s what I think happened. Keep what\'s right, change what isn\'t.',
         ),
         const SizedBox(height: Space.lg),
         JourneyCard(
@@ -193,77 +169,74 @@ class _LogEntryScreenState extends State<LogEntryScreen> {
             },
           ),
         ),
-        if (!blitz) ...[
-          const SizedBox(height: Space.xl),
-          _FieldCard(
-            title: 'How did it feel?',
-            icon: Icons.sentiment_satisfied_rounded,
-            isDefault: _c.happinessIsDefault,
-            onReset: _c.resetHappiness,
-            child: HappinessPicker(
-              value: _c.happiness,
-              usual: d.happinessDefault,
-              onChanged: _c.setHappiness,
-            ),
+        const SizedBox(height: Space.xl),
+        _FieldCard(
+          title: 'How did it feel?',
+          icon: Icons.sentiment_satisfied_rounded,
+          isDefault: _c.happinessIsDefault,
+          onReset: _c.resetHappiness,
+          child: HappinessPicker(
+            value: _c.happiness,
+            usual: d.happinessDefault,
+            onChanged: _c.setHappiness,
           ),
-          const SizedBox(height: Space.lg),
-          _FieldCard(
-            title: 'What happened?',
-            icon: Icons.local_activity_rounded,
-            isDefault: _c.eventIsDefault,
-            onReset: _c.resetEvent,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                for (final o in d.eventOptions) ...[
-                  OptionTile(
-                    label: o,
-                    usual: o == d.eventDefault,
-                    selected: !_c.eventCustom && _c.event == o,
-                    onTap: () => _c.setEvent(o),
-                  ),
-                  const SizedBox(height: Space.sm),
-                ],
-                if (d.allowCustom)
-                  OptionTile(
-                    label: _c.eventCustom ? _c.event : 'Something else',
-                    leadingIcon: Icons.edit_rounded,
-                    selected: _c.eventCustom,
-                    onTap: () => _editEvent(startWithCustom: true),
-                  ),
-              ],
-            ),
-          ),
-          const SizedBox(height: Space.lg),
-          _FieldCard(
-            title: 'When?',
-            icon: Icons.schedule_rounded,
-            isDefault: _c.timeIsDefault,
-            onReset: _c.resetTime,
-            child: Row(
-              children: [
-                Expanded(child: Text(formatSlot(context, _c.time), style: context.tt.headlineSmall)),
-                ChunkyButton(
-                  label: 'Change',
-                  variant: ChunkyVariant.secondary,
-                  compact: true,
-                  expand: false,
-                  onPressed: _editTime,
+        ),
+        const SizedBox(height: Space.lg),
+        _FieldCard(
+          title: 'What happened?',
+          icon: Icons.local_activity_rounded,
+          isDefault: _c.eventIsDefault,
+          onReset: _c.resetEvent,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              for (final o in d.eventOptions) ...[
+                OptionTile(
+                  label: o,
+                  usual: o == d.eventDefault,
+                  selected: !_c.eventCustom && _c.event == o,
+                  onTap: () => _c.setEvent(o),
                 ),
+                const SizedBox(height: Space.sm),
               ],
-            ),
+              if (d.allowCustom)
+                OptionTile(
+                  label: _c.eventCustom ? _c.event : 'Something else',
+                  leadingIcon: Icons.edit_rounded,
+                  selected: _c.eventCustom,
+                  onTap: () => _editEvent(startWithCustom: true),
+                ),
+            ],
           ),
-        ],
+        ),
+        const SizedBox(height: Space.lg),
+        _FieldCard(
+          title: 'When?',
+          icon: Icons.schedule_rounded,
+          isDefault: _c.timeIsDefault,
+          onReset: _c.resetTime,
+          child: Row(
+            children: [
+              Expanded(child: Text(formatSlot(context, _c.time), style: context.tt.headlineSmall)),
+              ChunkyButton(
+                label: 'Change',
+                variant: ChunkyVariant.secondary,
+                compact: true,
+                expand: false,
+                onPressed: _editTime,
+              ),
+            ],
+          ),
+        ),
       ],
     );
   }
 }
 
 class _OtterSays extends StatelessWidget {
-  const _OtterSays({required this.mood, required this.text, required this.size});
+  const _OtterSays({required this.mood, required this.text});
   final int mood;
   final String text;
-  final double size;
 
   @override
   Widget build(BuildContext context) {
@@ -271,7 +244,7 @@ class _OtterSays extends StatelessWidget {
       children: [
         AnimatedSize(
           duration: const Duration(milliseconds: 200),
-          child: OtterMascot(mood: mood, size: size),
+          child: OtterMascot(mood: mood, size: 104),
         ),
         const SizedBox(width: Space.md),
         Expanded(

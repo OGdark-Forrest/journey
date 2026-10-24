@@ -1,6 +1,7 @@
 import '../models/assessment.dart';
 import '../models/day_info.dart';
 import '../models/entry.dart';
+import '../models/goal.dart';
 import '../models/streak.dart';
 import '../models/time_slot.dart';
 import '../models/user_prefs.dart';
@@ -24,8 +25,8 @@ abstract interface class AssessmentRepository {
 }
 
 abstract interface class JournalRepository {
-  /// `GET /entries/draft?mode=normal|blitz`
-  Future<EntryDraft> fetchDraft(EntryMode mode);
+  /// `GET /entries/draft`
+  Future<EntryDraft> fetchDraft();
 
   /// `POST /entries`
   Future<SaveEntryResult> saveEntry(NewEntry entry);
@@ -41,6 +42,25 @@ abstract interface class JournalRepository {
 
   /// `PUT /day/{date}/wake-time`
   Future<DayInfo> saveWakeTime(DateTime date, FieldValue<TimeSlot> wakeTime);
+}
+
+/// Daily, weekly, and monthly goals. A goal is deleted once it is done.
+abstract interface class GoalRepository {
+  /// TODO(backend): `GET /goals`
+  Future<List<Goal>> fetch();
+
+  /// `POST /goals`
+  Future<Goal> add(GoalPeriod period, String text);
+
+  /// `DELETE /goals/{id}`
+  Future<void> delete(String id);
+}
+
+/// Whether the user has paid for Premium (unlocks Insights).
+// TODO(post-mvp): backed by the paywall / store purchase + cloud account.
+abstract interface class PremiumRepository {
+  Future<bool> isPremium();
+  Future<void> setPremium(bool value);
 }
 
 abstract interface class PrefsRepository {

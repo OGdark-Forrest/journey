@@ -16,7 +16,7 @@ import 'otter_mascot.dart';
 Future<void> showCelebration(
   BuildContext context, {
   required String title,
-  required String message,
+  String? message,
   String buttonLabel = 'Continue',
   Widget? highlight,
 }) {
@@ -45,7 +45,7 @@ class _Celebration extends StatefulWidget {
   const _Celebration({required this.title, required this.message, required this.buttonLabel, this.highlight});
 
   final String title;
-  final String message;
+  final String? message;
   final String buttonLabel;
   final Widget? highlight;
 
@@ -92,12 +92,14 @@ class _CelebrationState extends State<_Celebration> {
                     const OtterMascot(mood: Happiness.max, size: 120),
                     const SizedBox(height: Space.md),
                     Text(widget.title, style: context.tt.headlineSmall, textAlign: TextAlign.center),
-                    const SizedBox(height: Space.sm),
-                    Text(
-                      widget.message,
-                      style: context.tt.bodyLarge?.copyWith(color: context.jc.mutedText),
-                      textAlign: TextAlign.center,
-                    ),
+                    if (widget.message != null) ...[
+                      const SizedBox(height: Space.sm),
+                      Text(
+                        widget.message!,
+                        style: context.tt.bodyLarge?.copyWith(color: context.jc.mutedText),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
                     if (widget.highlight != null) ...[
                       const SizedBox(height: Space.lg),
                       widget.highlight!,

@@ -37,6 +37,18 @@ class AppController extends ChangeNotifier {
 
   bool _booting = false;
 
+  /// Fires only when something the router depends on changes (boot status or
+  /// onboarding). Preference changes such as theme or name don't fire it:
+  /// refreshing the router on those rebuilds the page stack and can leave
+  /// pending `context.push` calls (and the dashboard's navigation guard) stuck.
+  final ChangeNotifier _routingRefresh = ChangeNotifier();
+  Listenable get routingRefresh => _routingRefresh;
+
+  void _notifyRouting() {
+    _routingRefresh.notifyListeners();
+    notifyListeners();
+  }
+
   ThemeMode get themeMode => switch (_prefs?.theme) {
         ThemePreference.light => ThemeMode.light,
         ThemePreference.dark => ThemeMode.dark,
@@ -49,7 +61,7 @@ class AppController extends ChangeNotifier {
     _booting = true;
     _status = BootStatus.booting;
     _bootError = null;
-    notifyListeners();
+    _notifyRouting();
     try {
       await _python.start();
       final results = await Future.wait([_assessment.isCompleted(), _prefsRepo.fetch()]);
@@ -62,7 +74,7 @@ class AppController extends ChangeNotifier {
       _status = BootStatus.failed;
     } finally {
       _booting = false;
-      notifyListeners();
+      _notifyRouting();
     }
   }
 
@@ -79,7 +91,7 @@ class AppController extends ChangeNotifier {
     _assessmentCompleted = true;
     // Assessment may have set the display name / usual wake time.
     _prefs = await _prefsRepo.fetch();
-    notifyListeners();
+    _notifyRouting();
   }
 
   /// Sends the user back through onboarding (Settings -> Retake assessment).
@@ -87,7 +99,7 @@ class AppController extends ChangeNotifier {
     // TODO(backend): confirm with backend whether retaking should reset the
     // learned defaults or only update the answers.
     _assessmentCompleted = false;
-    notifyListeners();
+    _notifyRouting();
   }
 
   Future<void> updatePrefs(UserPrefs next) async {
@@ -107,6 +119,7 @@ class AppController extends ChangeNotifier {
   @override
   void dispose() {
     _lifecycle.dispose();
+    _routingRefresh.dispose();
     super.dispose();
   }
 }
