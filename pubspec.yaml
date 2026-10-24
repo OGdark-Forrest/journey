@@ -34,6 +34,15 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
+  # Material Design library (decoupled from the Flutter SDK). Import
+  # `package:material_ui/material_ui.dart`, not `package:flutter/material.dart`.
+  material_ui: 1.8.0
+  # Navigation + first-launch redirect (splash -> assessment -> dashboard).
+  go_router: 18.1.1
+  # Celebration bursts after saving entries / finishing the assessment.
+  confetti: 0.8.0
+  # TODO(backend): add `serious_python` (pinned) + `http` once the Python branch is ready.
+  # See .kiro/steering/tech.md "Android integration checklist" before adding.
 
 dev_dependencies:
   flutter_test:
@@ -73,6 +82,13 @@ flutter:
   # "family" key with the font family name, and a "fonts" key with a
   # list giving the asset and other descriptors for the font. For
   # example:
+  # Nunito variable font (OFL, see assets/fonts/Nunito-OFL.txt). Bundled so the app
+  # works fully offline. Default weight 630 is applied via FontVariation in theme.dart.
+  fonts:
+    - family: Nunito
+      fonts:
+        - asset: assets/fonts/Nunito-Variable.ttf
+
   # fonts:
   #   - family: Schyler
   #     fonts:
