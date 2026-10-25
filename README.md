@@ -1,5 +1,7 @@
 # Journey
 
+VIDEO URL: https://youtu.be/urVeJDINbgI
+
 Journey is a journaling app that gets rid of the blank page. You don't write entries from scratch. The app drafts each one from your routine, and you only change the parts of your day that were different.
 
 Each entry is one sentence with three tappable chips:
